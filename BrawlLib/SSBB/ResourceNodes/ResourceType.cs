@@ -235,6 +235,9 @@
 
         // SSEEX
         SELB,
-        SELCTeam
+        SELCTeam,
+
+        /// <summary>NW4R RWAR wave archive block (embedded Audio folder in RWSD/RBNK v2+).</summary>
+        RWAR
     }
 }

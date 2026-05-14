@@ -7,7 +7,7 @@ namespace BrawlLib.SSBB.ResourceNodes
     public unsafe class RWARNode : RSAREntryNode
     {
         internal RWAR* Header => (RWAR*) WorkingUncompressed.Address;
-        public override ResourceType ResourceFileType => ResourceType.Unknown;
+        public override ResourceType ResourceFileType => ResourceType.RWAR;
 
         public override bool OnInitialize()
         {

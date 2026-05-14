@@ -2,6 +2,8 @@
 using BrawlLib.SSBB.ResourceNodes;
 using System;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace BrawlCrate.NodeWrappers
@@ -45,6 +47,9 @@ namespace BrawlCrate.NodeWrappers
                 new ToolStripMenuItem("Group", null, NewGroupAction)
             ));
             _menu.Items.Add(new ToolStripSeparator());
+            _menu.Items.Add(new ToolStripMenuItem("Mass Replace WAVs…", null, MassReplaceWavsAction));
+            _menu.Items.Add(new ToolStripMenuItem("Mass Replace WAVs from Folder…", null, MassReplaceFolderAction));
+            _menu.Items.Add(new ToolStripSeparator());
             _menu.Items.Add(MoveUpToolStripMenuItem);
             _menu.Items.Add(MoveDownToolStripMenuItem);
             _menu.Items.Add(new ToolStripMenuItem("Re&name", null, RenameAction, Keys.Control | Keys.N));
@@ -83,6 +88,29 @@ namespace BrawlCrate.NodeWrappers
         protected static void NewGroupAction(object sender, EventArgs e)
         {
             GetInstance<RSARFolderWrapper>().NewGroup();
+        }
+
+        protected static void MassReplaceWavsAction(object sender, EventArgs e)
+        {
+            RSARFolderWrapper w = GetInstance<RSARFolderWrapper>();
+            if (Program.OpenFiles(RsarMassWavImport.WavFilter, out string[] paths) > 0)
+            {
+                RsarMassWavImport.RunFromRsarFolderSubtree(w._resource as RSARFolderNode, paths);
+            }
+        }
+
+        protected static void MassReplaceFolderAction(object sender, EventArgs e)
+        {
+            RSARFolderWrapper w = GetInstance<RSARFolderWrapper>();
+            string folder = Program.ChooseFolder();
+            if (string.IsNullOrEmpty(folder))
+            {
+                return;
+            }
+
+            string[] wavs = Directory.GetFiles(folder, "*.wav", SearchOption.TopDirectoryOnly)
+                .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase).ToArray();
+            RsarMassWavImport.RunFromRsarFolderSubtree(w._resource as RSARFolderNode, wavs);
         }
 
         private static void MenuClosing(object sender, ToolStripDropDownClosingEventArgs e)

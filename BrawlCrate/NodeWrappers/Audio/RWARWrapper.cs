@@ -1,4 +1,4 @@
-﻿using BrawlLib.SSBB.ResourceNodes;
+using BrawlLib.SSBB.ResourceNodes;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -7,8 +7,11 @@ using System.Windows.Forms;
 
 namespace BrawlCrate.NodeWrappers
 {
-    [NodeWrapper(ResourceType.RSARFileSoundGroup)]
-    public class RWSDSoundGroupWrapper : GenericWrapper
+    /// <summary>
+    /// Embedded RWAR wave archive (Audio folder for RWSD v3+ / RBNK v2+ inside RSAR or standalone files).
+    /// </summary>
+    [NodeWrapper(ResourceType.RWAR)]
+    public class RWARWrapper : GenericWrapper
     {
         #region Menu
 
@@ -32,7 +35,7 @@ namespace BrawlCrate.NodeWrappers
         private static readonly ToolStripMenuItem DeleteToolStripMenuItem =
             new ToolStripMenuItem("&Delete", null, DeleteAction, Keys.Control | Keys.Delete);
 
-        static RWSDSoundGroupWrapper()
+        static RWARWrapper()
         {
             _menu = new ContextMenuStrip();
             _menu.Items.Add(new ToolStripMenuItem("Import New Sound", null, CreateAction, Keys.Control | Keys.I));
@@ -54,12 +57,12 @@ namespace BrawlCrate.NodeWrappers
 
         protected static void CreateAction(object sender, EventArgs e)
         {
-            GetInstance<RWSDSoundGroupWrapper>().Import();
+            GetInstance<RWARWrapper>().ImportNewSound();
         }
 
         protected static void MassImportFilesAction(object sender, EventArgs e)
         {
-            RWSDSoundGroupWrapper w = GetInstance<RWSDSoundGroupWrapper>();
+            RWARWrapper w = GetInstance<RWARWrapper>();
             if (Program.OpenFiles(RsarMassWavImport.WavFilter, out string[] paths) > 0)
             {
                 RsarMassWavImport.RunFromPaths(w._resource, paths);
@@ -68,7 +71,7 @@ namespace BrawlCrate.NodeWrappers
 
         protected static void MassImportFolderAction(object sender, EventArgs e)
         {
-            RWSDSoundGroupWrapper w = GetInstance<RWSDSoundGroupWrapper>();
+            RWARWrapper w = GetInstance<RWARWrapper>();
             string folder = Program.ChooseFolder();
             if (string.IsNullOrEmpty(folder))
             {
@@ -80,21 +83,11 @@ namespace BrawlCrate.NodeWrappers
             RsarMassWavImport.RunFromPaths(w._resource, wavs);
         }
 
-        private void Import()
+        private void ImportNewSound()
         {
             if (Program.OpenFile(RsarMassWavImport.WavFilter, out string path))
             {
-                RSARFileAudioNode n;
-
-                if ((_resource.Parent as NW4RNode).VersionMinor >= 3)
-                {
-                    n = new RWAVNode();
-                }
-                else
-                {
-                    n = new WAVESoundNode();
-                }
-
+                RWAVNode n = new RWAVNode();
                 _resource.AddChild(n);
                 n.Replace(path);
 
@@ -116,7 +109,7 @@ namespace BrawlCrate.NodeWrappers
 
         private static void MenuOpening(object sender, CancelEventArgs e)
         {
-            RWSDSoundGroupWrapper w = GetInstance<RWSDSoundGroupWrapper>();
+            RWARWrapper w = GetInstance<RWARWrapper>();
 
             DuplicateToolStripMenuItem.Enabled = w.Parent != null;
             ReplaceToolStripMenuItem.Enabled = w.Parent != null;
@@ -128,7 +121,7 @@ namespace BrawlCrate.NodeWrappers
 
         #endregion
 
-        public RWSDSoundGroupWrapper()
+        public RWARWrapper()
         {
             ContextMenuStrip = _menu;
         }

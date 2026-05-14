@@ -112,6 +112,7 @@ namespace BrawlCrate.UI
             {ResourceType.BRESGroup, Resources.Folder},
             {ResourceType.RSARFolder, Resources.Folder},
             {ResourceType.RSARFileSoundGroup, Resources.Folder},
+            {ResourceType.RWAR, Resources.Folder},
             {ResourceType.RWSDDataGroup, Resources.Folder},
             {ResourceType.RSEQGroup, Resources.Folder},
             {ResourceType.RBNKGroup, Resources.Folder},
