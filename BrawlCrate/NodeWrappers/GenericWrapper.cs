@@ -263,7 +263,7 @@ namespace BrawlCrate.NodeWrappers
             }
         }
 
-        public void ExportSelected()
+        public virtual void ExportSelected()
         {
             string folder = Program.ChooseFolder();
             if (string.IsNullOrEmpty(folder))
