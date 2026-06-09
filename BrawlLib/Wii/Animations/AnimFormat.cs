@@ -1,4 +1,4 @@
-﻿using BrawlLib.SSBB.ResourceNodes;
+using BrawlLib.SSBB.ResourceNodes;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,6 +14,13 @@ namespace BrawlLib.Wii.Animations
 
         public static void Serialize(CHR0Node node, string output)
         {
+            Dictionary<CHR0Node, string> dict = new Dictionary<CHR0Node, string>();
+            dict.Add(node, output);
+            Serialize(dict);
+        }
+
+        public static void Serialize(Dictionary<CHR0Node, string> exports)
+        {
             MDL0Node model;
 
             OpenFileDialog dlgOpen = new OpenFileDialog
@@ -28,7 +35,10 @@ namespace BrawlLib.Wii.Animations
                 return;
             }
 
-            Serialize(node, output, model);
+            foreach (KeyValuePair<CHR0Node, string> node in exports)
+            {
+                Serialize(node.Key, node.Value, model);
+            }
         }
 
         public static void Serialize(CHR0Node node, string output, MDL0Node model)

@@ -1,4 +1,4 @@
-﻿using BrawlCrate.UI;
+using BrawlCrate.UI;
 using BrawlLib.Internal.Windows.Controls;
 using BrawlLib.Internal.Windows.Forms;
 using BrawlLib.SSBB;
@@ -7,7 +7,9 @@ using BrawlLib.Wii.Animations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace BrawlCrate.NodeWrappers
@@ -163,6 +165,74 @@ namespace BrawlCrate.NodeWrappers
                     break;
                 }
             }
+        }
+
+        public override void ExportSelected()
+        {
+            if (!MainForm.Instance.resourceTree.SelectedNodes.All(t => t is CHR0Wrapper))
+            {
+                base.ExportSelected();
+                return;
+            }
+
+            string folder = Program.ChooseFolder();
+            if (string.IsNullOrEmpty(folder))
+            {
+                return;
+            }
+
+            Dictionary<Type, string> extensions = new Dictionary<Type, string>();
+            List<GenericWrapper> nodes = new List<GenericWrapper>();
+            foreach (TreeNode tNode in MainForm.Instance.resourceTree.SelectedNodes)
+            {
+                if (tNode is CHR0Wrapper g)
+                {
+                    nodes.Add(g);
+                    if (!extensions.ContainsKey(g._resource.GetType()))
+                    {
+                        extensions.Add(g._resource.GetType(), g.ExportFilter);
+                    }
+                }
+            }
+
+            ExportAllFormatDialog dialog = new ExportAllFormatDialog("Export Selected", _resource.GetType(), ExportFilter);
+            string chosenExtension = string.Empty;
+            DialogResult? d = null;
+            if (dialog.AutoSelect || dialog.Valid && (d = dialog.ShowDialog()) == DialogResult.OK)
+            {
+                chosenExtension = dialog.SelectedExtension;
+                if (!string.IsNullOrEmpty(chosenExtension) && !chosenExtension.StartsWith("."))
+                {
+                    chosenExtension = chosenExtension.Insert(0, ".");
+                }
+            }
+            else if (d != null)
+            {
+                return;
+            }
+
+            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
+            string invalidRegStr = string.Format(@"([{0}]*\.+$)|([{0}]+)", invalidChars);
+            Dictionary<CHR0Node, string> animExports = new Dictionary<CHR0Node, string>();
+            foreach (CHR0Wrapper n in nodes)
+            {
+                string outPath =
+                    $"{folder}\\{Regex.Replace($"{n.DefaultName}{chosenExtension ?? ""}", invalidRegStr, "")}";
+                if (chosenExtension.Equals(".anim", StringComparison.OrdinalIgnoreCase))
+                {
+                    animExports.Add(n._resource as CHR0Node, outPath);
+                }
+                else
+                {
+                    n.OnExport(outPath);
+                }
+            }
+            if (chosenExtension.Equals(".anim", StringComparison.OrdinalIgnoreCase))
+            {
+                AnimFormat.Serialize(animExports);
+            }
+
+            MessageBox.Show($"{nodes.Count} nodes successfully exported to {folder}", "Export Selected");
         }
 
         #endregion
